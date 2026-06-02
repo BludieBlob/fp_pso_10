@@ -36,9 +36,8 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
-        # coba disable lint
-      # - name: Run Lint
-      #  run: pnpm turbo run lint
+      - name: Run Lint
+        run: pnpm turbo run lint
 
       - name: Run Tests
         run: pnpm turbo run test
