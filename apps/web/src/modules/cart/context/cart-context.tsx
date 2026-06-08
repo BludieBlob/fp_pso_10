@@ -61,7 +61,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             setItems(JSON.parse(storedCart));
           }
         }
-      } catch (error) {
+      } catch (_error) {
         console.error('Error loading cart:', error);
       } finally {
         setLoading(false);
@@ -120,7 +120,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           description: 'Your item has been saved to your local cart.',
         });
       }
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: 'Error adding item',
         description: 'There was a problem adding your item to the cart.',
@@ -145,7 +145,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         title: 'Item removed',
         description: 'The item has been removed from your cart.',
       });
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: 'Error removing item',
         description: 'There was a problem removing the item from your cart.',
@@ -171,7 +171,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           ),
         );
       }
-    } catch (error) {
+    } catch (_error) {
       console.error('Error updating cart item:', error);
     } finally {
       setLoading(false);
@@ -189,7 +189,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         title: 'Cart cleared',
         description: 'All items have been removed from your cart.',
       });
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: 'Error clearing cart',
         description: 'There was a problem clearing your cart.',

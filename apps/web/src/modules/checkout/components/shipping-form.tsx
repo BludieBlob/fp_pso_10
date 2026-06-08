@@ -43,7 +43,7 @@ export function ShippingForm() {
       const shippingAddress = response.data;
       setShippingAddress(shippingAddress);
       router.push('/checkout/payment');
-    } catch (error) {
+    } catch (_error) {
       toast({
         title: 'Error saving shipping details',
         description: 'Please try again.',

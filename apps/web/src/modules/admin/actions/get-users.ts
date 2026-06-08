@@ -17,7 +17,7 @@ export async function getUsers(
     const data: PaginatedResponse<User> = await response.json();
 
     return data;
-  } catch (error) {
+  } catch (_error) {
     console.error('Error fetching users:', error);
     return {
       items: [],

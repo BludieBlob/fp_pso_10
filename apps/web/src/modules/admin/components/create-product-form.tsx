@@ -72,7 +72,7 @@ export function CreateProductForm() {
       productSchema.shape[field].parse(value);
       setErrors(prev => ({ ...prev, [field]: undefined }));
       return true;
-    } catch (error) {
+    } catch (_error) {
       if (error instanceof ZodError) {
         setErrors(prev => ({ ...prev, [field]: error.errors[0].message }));
       }

@@ -57,7 +57,7 @@ apiClient.interceptors.response.use(
       await refreshToken();
       processQueue(null, 'refreshed');
       return apiClient(originalRequest);
-    } catch (error) {
+    } catch (_error) {
       processQueue(error, null);
       throw error;
     } finally {
