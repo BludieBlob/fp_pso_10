@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - jobi
       - staging
   workflow_dispatch:
 
