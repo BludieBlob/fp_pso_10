@@ -54,7 +54,7 @@ jobs:
       - name: Build Web Docker Image
         run: |
           docker build \
-          -f web/dockerfile \
+          -f apps/web/dockerfile \
           -t $REGISTRY/$WEB_IMAGE:${{ github.sha }} \
           -t $REGISTRY/$WEB_IMAGE:latest \
           .
@@ -67,7 +67,7 @@ jobs:
       - name: Build Server Docker Image
         run: |
           docker build \
-          -f server/dockerfile \
+          -f apps/server/dockerfile \
           -t $REGISTRY/$SERVER_IMAGE:${{ github.sha }} \
           -t $REGISTRY/$SERVER_IMAGE:latest \
           .
