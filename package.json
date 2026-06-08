@@ -21,7 +21,10 @@
     "test": "turbo run test"
   },
   "devDependencies": {
+    "@elecshop/server": "workspace:^",
+    "filter": "^0.1.1",
     "prettier": "^3.4.2",
+    "rimraf": "^6.1.3",
     "turbo": "^2.3.3"
   }
 }
