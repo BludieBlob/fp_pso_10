@@ -10,7 +10,7 @@ import { toast } from '@/hooks/use-toast';
 import { useActionState, useEffect, useState } from 'react';
 import { createProduct } from '@/modules/products/actions/create-product';
 import { productSchema } from '@/modules/products/validation/product';
-import { ZodError, type z } from 'zod';
+import { ZodError } from 'zod';  // removed unused `z` type import
 import {
   Select,
   SelectContent,
@@ -67,14 +67,18 @@ export function CreateProductForm() {
     }
   }, [productState, router]);
 
-  const validateField = (field: keyof ProductFormData, value: any) => {
+  // value typed as the field's actual Zod-inferred type via ProductFormData
+  const validateField = (
+    field: keyof ProductFormData,
+    value: ProductFormData[keyof ProductFormData],  // was: any
+  ) => {
     try {
       productSchema.shape[field].parse(value);
       setErrors(prev => ({ ...prev, [field]: undefined }));
       return true;
-    } catch (_error) {
-      if (error instanceof ZodError) {
-        setErrors(prev => ({ ...prev, [field]: error.errors[0].message }));
+    } catch (err: unknown) {  // was: _error (flagged) — also fixed bug: was referencing `error` not `_error`
+      if (err instanceof ZodError) {
+        setErrors(prev => ({ ...prev, [field]: err.errors[0].message }));
       }
       return false;
     }
@@ -118,7 +122,6 @@ export function CreateProductForm() {
   };
 
   const handleSubmit = async (formData: FormData) => {
-    // Convert formData to match our schema for validation
     const dataToValidate = {
       name: formData.get('name') as string,
       description: formData.get('description') as string,
@@ -130,7 +133,6 @@ export function CreateProductForm() {
       brandLogo: formData.get('brandLogo') as File,
     };
 
-    // Validate all fields
     const result = productSchema.safeParse(dataToValidate);
 
     console.log(result);
@@ -144,17 +146,14 @@ export function CreateProductForm() {
       return;
     }
 
-    // Create new FormData to send
     const formDataToSend = new FormData();
 
-    // Append all form fields
     Object.entries(dataToValidate).forEach(([key, value]) => {
       if (key !== 'images') {
         formDataToSend.append(key, String(value));
       }
     });
 
-    // Append images
     const files = formData.getAll('images');
     if (files.length === 0) {
       toast({
