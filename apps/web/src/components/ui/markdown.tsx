@@ -17,17 +17,17 @@ export const Markdown = memo(function Markdown({
       remarkPlugins={[remarkGfm]}
       components={{
         // react-markdown v8+ removed the `inline` prop.
-        // Detect inline code by checking whether the parent is a <pre> block:
-        // if the code element has no language class it's inline.
-        code({ node: _node, className, children, ...props }) {
+        // Block code has a language className; inline code does not.
+        // Do NOT spread ...props into SyntaxHighlighter — its ref type is
+        // incompatible with the HTMLElement ref that react-markdown passes.
+        code({ node: _node, className, children }) {
           const match = /language-(\w+)/.exec(className || '');
-          const isBlock = Boolean(match);
-          return isBlock ? (
-            <SyntaxHighlighter language={match![1]} PreTag="div" {...props}>
+          return match ? (
+            <SyntaxHighlighter language={match[1]} PreTag="div">
               {String(children).replace(/\n$/, '')}
             </SyntaxHighlighter>
           ) : (
-            <code className={className} {...props}>
+            <code className={className}>
               {children}
             </code>
           );
