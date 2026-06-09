@@ -3,12 +3,15 @@ on:
   push:
     branches:
       - main
+<<<<<<< HEAD
       - gabs
+=======
+>>>>>>> origin/main
       - staging
   workflow_dispatch:
 
 env:
-  REGISTRY: ""
+  REGISTRY: ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}
   WEB_IMAGE: elecshop-web
   SERVER_IMAGE: elecshop-server
 
@@ -78,8 +81,88 @@ jobs:
 
       - name: Display Published Images
         run: |
+<<<<<<< HEAD
           echo "Published:"
           echo "$REGISTRY/$WEB_IMAGE:${{ github.sha }}"
           echo "$REGISTRY/$WEB_IMAGE:latest"
           echo "$REGISTRY/$SERVER_IMAGE:${{ github.sha }}"
           echo "$REGISTRY/$SERVER_IMAGE:latest"
+=======
+          echo "### Staging Images Pushed to ACR" >> $GITHUB_STEP_SUMMARY
+          echo "Azure App Service (staging) will auto-deploy via ACR webhook." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Image | Tags |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|------|" >> $GITHUB_STEP_SUMMARY
+          echo "| \`$REGISTRY/$WEB_IMAGE\` | \`${{ github.sha }}\`, \`staging\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| \`$REGISTRY/$SERVER_IMAGE\` | \`${{ github.sha }}\`, \`staging\` |" >> $GITHUB_STEP_SUMMARY
+
+# ─────────────────────────────────────────────────────────────────────────────
+# JOB 3: Promote Staging → Production (retag only, no rebuild)
+# Runs after staging deploy. Pauses for manual approval via GitHub Environment.
+# Set up required reviewers at: Settings > Environments > production
+# Uses ACR HTTP API to retag :staging → :latest server-side (no image transfer).
+# App Service (production) watches :latest and auto-deploys via ACR webhook.
+# ─────────────────────────────────────────────────────────────────────────────
+  promote-production:
+    name: Promote to Production (retag)
+    runs-on: ubuntu-latest
+    needs: build-and-deploy-staging
+
+    environment:
+      name: production
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Retag Web Image (staging → latest)
+        run: |
+          TOKEN=$(curl -s -u "${{ secrets.AZURE_REGISTRY_USERNAME }}:${{ secrets.AZURE_REGISTRY_PASSWORD }}" \
+            "https://$REGISTRY/oauth2/token?service=$REGISTRY&scope=repository:$WEB_IMAGE:pull,push" \
+            | jq -r '.access_token')
+
+          MANIFEST=$(curl -s -H "Authorization: Bearer $TOKEN" \
+            -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+            "https://$REGISTRY/v2/$WEB_IMAGE/manifests/staging")
+
+          MEDIA_TYPE=$(echo "$MANIFEST" | jq -r '.mediaType')
+
+          curl -s -X PUT \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Content-Type: $MEDIA_TYPE" \
+            -d "$MANIFEST" \
+            "https://$REGISTRY/v2/$WEB_IMAGE/manifests/latest"
+
+          echo "$WEB_IMAGE: staging → latest"
+
+      - name: Retag Server Image (staging → latest)
+        run: |
+          TOKEN=$(curl -s -u "${{ secrets.AZURE_REGISTRY_USERNAME }}:${{ secrets.AZURE_REGISTRY_PASSWORD }}" \
+            "https://$REGISTRY/oauth2/token?service=$REGISTRY&scope=repository:$SERVER_IMAGE:pull,push" \
+            | jq -r '.access_token')
+
+          MANIFEST=$(curl -s -H "Authorization: Bearer $TOKEN" \
+            -H "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+            "https://$REGISTRY/v2/$SERVER_IMAGE/manifests/staging")
+
+          MEDIA_TYPE=$(echo "$MANIFEST" | jq -r '.mediaType')
+
+          curl -s -X PUT \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Content-Type: $MEDIA_TYPE" \
+            -d "$MANIFEST" \
+            "https://$REGISTRY/v2/$SERVER_IMAGE/manifests/latest"
+
+          echo "$SERVER_IMAGE: staging → latest"
+
+      - name: Summary
+        run: |
+          echo "### Production Promotion Complete" >> $GITHUB_STEP_SUMMARY
+          echo "No rebuild — \`staging\` manifests retagged to \`latest\` via ACR HTTP API." >> $GITHUB_STEP_SUMMARY
+          echo "Azure App Service (production) will auto-deploy via ACR webhook." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Image | Promoted Tag |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------------|" >> $GITHUB_STEP_SUMMARY
+          echo "| \`$REGISTRY/$WEB_IMAGE\` | \`staging\` → \`latest\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| \`$REGISTRY/$SERVER_IMAGE\` | \`staging\` → \`latest\` |" >> $GITHUB_STEP_SUMMARY
+>>>>>>> origin/main
