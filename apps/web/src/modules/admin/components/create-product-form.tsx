@@ -7,7 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from '@/hooks/use-toast';
-import { useActionState, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useActionState } from 'react-dom';
 import { createProduct } from '@/modules/products/actions/create-product';
 import { productSchema } from '@/modules/products/validation/product';
 import { ZodError } from 'zod';  // removed unused `z` type import
