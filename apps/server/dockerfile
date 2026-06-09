@@ -8,9 +8,8 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
 COPY apps/web/package.json ./apps/web/
 COPY apps/server/package.json ./apps/server/
-COPY packages/shared/package.json ./packages/shared/
+COPY apps/shared/package.json ./apps/shared/
 
-# Install ALL deps including devDependencies (needed for build)
 RUN pnpm install --frozen-lockfile
 
 COPY . .
@@ -25,14 +24,9 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=5000
 
-# Copy compiled NestJS dist output
 COPY --from=builder /app/apps/server/dist ./dist
-
-# Copy ALL node_modules (including dotenv which is required by dist/main.js)
 COPY --from=builder /app/node_modules ./node_modules
-
-# Copy shared packages
-COPY --from=builder /app/packages ./packages
+COPY --from=builder /app/apps/shared ./apps/shared
 
 EXPOSE 5000
 
