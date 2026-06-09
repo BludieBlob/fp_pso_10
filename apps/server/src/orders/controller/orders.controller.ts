@@ -12,36 +12,8 @@ import { OrdersService } from '../services/orders.service';
 import { UserDocument } from '@/users/schemas/user.schema';
 import { CurrentUser } from '@/decorators/current-user.decorator';
 import { JwtAuthGuard } from '@/guards/jwt-auth.guard';
-
-// Minimal shape for order creation body
-interface CreateOrderBody {
-  orderItems: {
-    productId: string;
-    name: string;
-    qty: number;
-    image: string;
-    price: number;
-  }[];
-  shippingAddress: {
-    address: string;
-    city: string;
-    postalCode: string;
-    country: string;
-  };
-  paymentMethod: string;
-  itemsPrice: number;
-  taxPrice: number;
-  shippingPrice: number;
-  totalPrice: number;
-}
-
-// Payment result from Stripe/PayPal webhook
-interface PaymentResult {
-  id: string;
-  status: string;
-  update_time: string;
-  email_address: string;
-}
+import { Order } from '../schemas/order.schema';
+import { PaymentResult } from 'src/interfaces';
 
 @Controller('orders')
 export class OrdersController {
@@ -50,7 +22,9 @@ export class OrdersController {
   @UseGuards(JwtAuthGuard)
   @Post()
   async createOrder(
-    @Body() body: CreateOrderBody,
+    // Body matches Partial<Order> which is what the service expects.
+    // The client sends productId as a string; Mongoose coerces it to ObjectId at save time.
+    @Body() body: Partial<Order>,
     @CurrentUser() user: UserDocument,
   ) {
     return this.ordersService.create(body, user._id.toString());

@@ -38,9 +38,11 @@ export class ImageGenerationService {
         },
       });
 
+      // Replicate SDK returns output as unknown at runtime; we know it's Buffer[]
+      // for image models. Cast via unknown to avoid @ts-expect-error on a line
+      // that TypeScript may or may not flag depending on SDK version.
       const urls: string[] = await Promise.all(
-        // @ts-expect-error -- Replicate SDK types output as unknown; runtime value is Buffer[]
-        (output as Buffer[]).map(async (item: Buffer) => {
+        (output as unknown as Buffer[]).map(async (item: Buffer) => {
           return this.cloudinary.uploadBuffer(item);
         }),
       );
