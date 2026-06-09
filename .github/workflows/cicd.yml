@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 env:
-  REGISTRY: "AZURE_REGISTRY_LOGIN_SERVER"
+  REGISTRY: "${{ secrets.AZURE_REGISTRY_PASSWORD }}"
   WEB_IMAGE: elecshop-web
   SERVER_IMAGE: elecshop-server
 
